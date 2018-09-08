@@ -1,0 +1,66 @@
+vsftpd 是 “very secure FTP daemon”的缩写，安全性是它的一个最大的特点。vsftpd是一个UNIX类操作系统上运行的服务器的名字。它可以运行在诸如Linux，BSD，Solaris，HP-UNIX等系统上面，是一个完全免费到，开发源代码到ftp服务器软件，支持很多其他FTP服务器所不支持到特征。优点：非常高的安全性需求，带宽限制，良好的可伸缩性，可创建虚拟用户，支持IPv6，速率高等。特点：小巧轻快，安全易用。
+配置文件：/etc/vsftpd/vsftpd.conf
+共享目录：/var/ftp/
+重启服务：
+	service vsftpd restart
+
+登录服务器：
+	lftp  IP地址
+命令： ls    cd    get  mirror    put   lcd  
+ 
+
+NFS=network file system
+NFS最初是由SUN公司开发的，目的就是在计算机不同操作系统之间可以彼此共享文件，NFS配置简单，快捷。
+客户端可以通过mount像使用本地文件系统一样来使用远端共享目录。
+
+NFS涉及的软件包和服务:
+nfs-utils  软件包提供rpc.nfsd服务，用以登录权限检查等。提供rpc.mountd服务，用以开启RPC服务负责传输NFS信息。
+RPC（Remote Procedure Call）  远程系统调用，协助NFS完成数据和其他相关信息的传输。NFS可以看作一个文件系统。
+主要管理共享出来的目录，至于数据的传输，就交给RPC来处理。
+portmap  当Client连接RPC server所提供的服务时，Client需要一个可以连接的端口才能够使用RPC server提供的服务，
+因此Client 会向portmap请求一个端口，portmap自动将自己管理的端口分配给Client，这样就可以连接到server。
+
+安装（默认安装）：
+#yum -y install nfs-utils*
+#yum -y install portmap    （rhel6使用到是rpcbind） 
+配置文件：/etc/exports   
+exports格式
+共享目录  主机1或IP1(参数1,参数2...) 主机2或IP2(参数3,参数4)
+例：共享/var/ftp/pub目录以读写共享给192.168.1.0/24整个网段，以只读方式共享给10.10.10.10主机。
+/var/ftp/pub  192.168.1.*(rw,async) 10.10.10.10(ro)
+PS：192.168.1.*  192.168.1.0/24  192.168.1.0/255.255.55.0  *. example.com
+常用参数：
+rw ：读写    	ro：只读
+root_squash：如果以root登录NFS，默认参数root_squash会使身份自动切换为nfsnobody。
+no_root_squash：关闭上面的功能，登录者对于共享目录有root的权限。
+all_squash：不管登录NFS主机的用户是什么身份都会切换为nfsnobody。
+anonuid/anongid：将登入NFS主机的用户都设定成指定的UID和GID。
+sync/async：资料同步写入到硬盘/暂时存放在内存中不直接写盘
+soft/hard：soft情况下客户端会向应用程序返回错误。没设置和hard导致NFS请求无限重试。（soft可能会导致静默的数据损坏，使用nfs的tcp模式更好。fstab：proto=tcp）
+intr：允许信号中断NFS操作。2.6.25以后被废弃。
+启动服务：
+#service portmap restart       #service rpcbind restart
+#service nfs restart
+
+挂载：
+#showmount -e 192.168.1.254
+#mount -t nfs 192.168.1.254:/var/ftp/pub /mnt
+
+
+
+
+tftp（Trivial  File Transfer Protocol, 简单文件传输协议）是TCP/IP协议族中的一个用来在客户机与服务器之间进行简单文件传输的协议，提供不复杂，开销不大的文件传输服务。TFTP是一个传输文件的简单协议，它基于UDP协议而实现，但是我们也不能确定有些TFTP协议是基于其它传输协议完成的。此协议设计的时候是进行小文件传输的。因此它不具备通常到FTP的很多功能，它只能从文件服务器上获得或者写入文件，不能列出目录，不进行认证。
+安装：
+ yum install tftp*
+配置文件：  /etc/xinetd.d/tftp
+共享目录：/tftpboot
+重启服务：
+	service  xinetd  restart
+
+登录服务器：
+	tftp   IP地址
+命令： get   put
+
+
+
+

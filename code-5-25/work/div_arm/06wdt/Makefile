@@ -1,0 +1,19 @@
+# 外部模块的Makefile
+# Author: zht
+# Date: 2015-08-24
+obj-m := wdt_test01.o
+obj-m += wdt_dev.o
+KERNEL := /root/Desktop/kernel4412/kernel/linux35_tiny4412/
+all:
+	make -C $(KERNEL) M=`pwd` modules
+install:
+	adb remount
+	adb push wdt_test01.ko /system/lib/modules/
+	adb push wdt_dev.ko /system/lib/modules/
+install-elf:
+	adb remount
+	arm-linux-gcc -static -o timer01 timer01.c
+	adb push timer01 /system/bin/
+clean:
+	make -C $(KERNEL) M=`pwd` clean
+

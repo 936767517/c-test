@@ -1,0 +1,4 @@
+CFLAGS+=-I../include
+
+
+

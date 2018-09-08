@@ -1,0 +1,24 @@
+
+
+int main()
+{
+
+	socket();
+
+//	bind();
+
+
+	connect();
+
+
+	recv();
+
+
+	close();
+
+
+	exit(0);
+}
+
+
+

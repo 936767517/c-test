@@ -1,0 +1,468 @@
+  linux:
+   1,没有信息就是好事,只报错
+   2，一切皆为文件（磁盘 光驱）
+   3，所有的配置都是以文本的形式存在
+   4、单个命令功能强大，连接多个命令完成强大的功能
+   5、没有过多的交互，命令的不同功能通过参数来完成
+
+gedit打开图形编辑器
+
+vi
+模式切换:编辑模式(insert mode) 修改文件内容
+         命令模式 command mode 复制 剪切 
+         Ex mode  退出 保存 
+vim
+（如果系统只有vi没有 vim，是少装了一个系统安装包）
+
+vim
+模式切换:编辑模式(insert mode) 修改文件内容
+         命令模式 command mode 复制 剪切 
+         末行模式(Ex mode)  设置 退出 保存
+              
+                 vim file
+                                                      |       
+              i     |         :w :q :wq（保存  退出  保存并退出）
+insert mode <--- command mode----> Ex mode
+            ------>           <-------
+              Esc            Esc
+insert mode
+    	i 当前插入
+	I 行首插入
+	a 当前字符之后插入
+	A 行尾插入
+	o 下一行插入
+	O 上一行插入
+
+
+
+Ex mode:    :wqa!
+:w   :q    :q!不保存退出  :wq    :wq!强行保存退出（慎用）
+
+
+  ＊＊＊＊  :%s/old/new/g  ＊＊＊＊  
+        ％ 首行到尾行
+       s 替换
+       /old/new/
+       g 一行中所有出现的
+	:％s/要替换的内容/替换的内容/g    （％所有行，不加表示只替换当前行  g全部都替换，不加只替换第 一个）
+
+	:set number  临时设置行号
+	vim ~/.vimrc  只对某一个用户生效
+	vim /etc/vimrc  对所有用户生效
+
+
+command mode: 
+
+	x 向后删除一个字符
+	X 向前删除一个字符
+	u 撤销一步
+	U 撤销所有更改行操作
+	dd 剪切/删除一行     Ndd  剪切／删除N行
+	yy 复制一行    Nyy  复制N行
+	p  将复制行粘贴（向下）    P上粘
+
+	v
+	进入v模式 移动光标选择区域
+       G  跳到文件的末尾  NG
+        gg  跳到文件开始
+      xxG    跳到文件xx行
+
+
+            ~/.vimrc 创建配置文件，下加上要配置的命令
+
+
+     vimdiff file1 file2
+       Ctrl+ww
+
+	vim  file1 file2 ... -o -O -p
+
+
+用户管理机制分析以及常用命令
+ user: 
+  1.用户分为3类 root  系统用户  本地用户(普通用户)
+                 0   1－499         500
+root 管理员  系统用户   用来读取配置文件
+
+  2。每个用户被分配一个唯一的ID－－－－－ UID
+  3。用户的帐户信息保存在/etc/passwd	
+＠＠＠＠
+passwd  每一行共分7部分 
+例如：  root:x:0:0:root:/root:/bin/bash
+1  帐户名  2 有无密码 x表示有密码  3 用户ID  4  组ID 5 描述性文字  6  用户家目录 ／用户登录后的位置 7  用户执行的shell／用户登录后执行的第一个程序
+＠＠＠＠
+   man 5 passwd
+    1，帐户名称
+    2，密码占位符
+   3，UID
+   4，GID
+    5，描述性文字
+    6，用户登录后默认所在目录（家目录）
+    7，用户使用的shell
+@@@@@@@
+	用户的密码信息保存在/etc/shadow
+shadow 每一行分9部分
+例如：root:$ssdfd$sdfsd$skdjeisldkjf:15951:0:99999:7:::
+	man 5 shadow
+	1、用户名
+	2、加密密码
+	3、自1970-1-1起，密码最后一次修改距现在的天数
+	4、密码将被允许修改新密码之前的天数（0表示可在任何时间修改）
+	5、系统将强制用户修改新密码之前的天数（1表示用用不能修改）
+	6、密码过期之前，用户将被警告过期的天数（-1表示没有警告）
+	7、密码过期后，系统自动禁用账户的天数（-1表示不禁用）
+	8、该账户被禁用的天数（-1表示该账户被启用）
+	9、保留供将来使用
+ 4。建立一个用户的时候会同时建立一个同名的组，防止用户处在一个无组的状态
+
+   group: 多个用户的集合  用户与组是多对多的关系
+    1。每个组被分配一个唯一的ID －－－－GID
+    2。组的信息被存放在/etc/group
+＠＠＠＠＠
+group分4部分
+       1,组名称
+       2，密码占位
+      3，GID
+       4，组成员
+＠＠＠＠＠
+
+adduser <username>
+useradd <username>
+passwd <username>
+               
+id <username>
+su -  <username>  切换用户 “－“必加
+exit  退出并回到root用户
+
+usermod    
+    -d 修改用户的家目录 
+    -g 修改用户的主组 
+    -G 给用户添加附属组，多个时要一起添加，不可一个一个添加，否则会替换先前的附属组
+      1、usermod －G group1,group2,group3 用户名
+     2、usermod －aG group1 用户名
+        usermod  －aG  group2  用户名
+  
+
+userdel  ［-r］ <usename>
+     -r 删除用户的家目录和邮件  
+
+useradd
+ 加载 /etc/login.defs 
+  在/etc/passwd添加帐户信息
+  在/etc/shadow 用户密码信息
+  在/etc/group添加组信息
+  在/etc/gshadow添加组密码信息
+  在/home目录下创建用户的家目录
+  拷贝/etc/skel/下的环境变量文件到用户的家目录
+创建邮件
+  设置用户的权限
+passwd
+  在/etc/shadow中更新用户的密码
+
+
+配置文件：
+/etc/default/useradd
+GROUP=100 注：gid=100，表示可创建普通组。
+HOME=/home 注：把用户的家目录建在/home中。
+INACTIVE=-1 注：是否启用帐号过期停权，-1表示不启用。对应第7栏。
+EXPIRE= 注：帐号终止日期，不设置表示不启用。对应第8栏。
+SHELL=/bin/bash 注：所用SHELL的类型。
+SKEL=/etc/skel 注： 默认添加用户的目录默认文件存放位置。也就是说，当我们用adduser添加用户时，用户家目录下的文件，都是从这个目录中复制过去的
+/etc/login.defs
+PASS_MAX_DAYS   99999  第5栏
+PASS_MIN_DAYS   0  第4栏
+PASS_MIN_LEN    5  被pam取代而失效
+PASS_WARN_AGE   7  第6栏
+
+ 手工编辑配置文件创建用户tony，密码：uplooking
+ su － tony 能够正常使用
+  1./etc/passwd
+  2.grub-md5-crypt------>/etc/shadow 
+  3./etc/group
+  4./etc/gshadow
+  5. /home/tony
+  6.cp -a /etc/skel/.[!.]* /home/tony
+  7. chown -R tony.tony /home/tony
+
+ 如何批量创建用户 user1～user10
+ shell
+ vim a.sh
+ #!/bin/bash
+ for i in 1 2 3 4 5 6 7 8 9 10
+ do useradd user$i
+ done
+sh a.sh
+
+ newusers file.user
+ user1:x:500:500::/home/user1:/bin/bash
+ user2:x:500:500::/home/user2:/bin/bash
+ user3:x:500:500::/home/user3:/bin/bash
+...........
+
+
+groupadd <groupname>
+groupmod <groupname>
+groupdel <groupname>
+
+gpasswd
+ gpasswd -a user group
+ gpasswd -d user group
+
+普通权限
+默认权限  VS  umask
+文件系统属性   chattr
+特殊权限
+文件系统的ACL
+
+who
+w
+
+
+＊＊＊＊＊＊＊
+权限  ugo
+   user group other
+  rw-  r--  r--   root  root    file
+            rw－  owner  UID
+            r－－  group
+            r－－  other
+ user group other
+              file        directory
+    r       浏览 cat           ls
+    w       编辑 vi        创建touch/删除rm
+    x       执行（脚本）          cd
+           -                      无
+
+chown  [-R]  改文件所属人   －R 将文件所属下的文件都改成要改变的所属人
+格式  chown 所属人  要改变的所属人
+chown root:root file  改所属人和所属组
+chown .root file  只改所属组  （ “.”和“:”功能相同）
+chgrp  [-R]   改文件所属组
+
+chmod  改权限，ugo分别代表一个三位组
+chmod  ugoa + - = rwx
+chmod u+x file
+      o-w file
+      o=r
+      a+w
+      go-wx file    
+     
+  chmod 640 file  640分别代表一个三位组
+      6 user   rw-
+      4 group  r--
+      0  other ---
+  r:4    w:2   x:1    110100000（二进制）
+   100     010     001
+
+????????????????????????????????????????????????????????????????
+    /test/file1   640
+1。 file: user1 rw      owner:user1
+           user2 r        group:user2
+           user3 无
+2。 file：
+	   user1 rw        owner:user1
+          user2 user3：r    group user1
+          other  无
+	  gpasswd -a user2 user1
+          gpasswd -a user3 user1
+3。 创建组 sales it serv
+     将user2 添加到这个3个组中
+   usermod -G sales,it,serv user2
+   usermod -aG sales   user2
+           -aG it   user2
+   gpasswd -a it user2
+4。建立用户user4要求user4的家目录是/test/user4
+   usermod -d /test/user4 user4
+   useradd -d /test/user4 user4
+
+
+基本文件拥有者分类
+u      User permission bits.
+g      Group permission bits.
+o      Other permission bits.
+a      All permission bits.
+
+默认权限与umask
+ default & (~umask)
+Umask持续设置方法及对用户默认创建文件及目录的权限影响
+    file:644    dir:755
+ file:default permission 666
+ dir :default permission 777
+     root:022    user:002
+
+＠＠＠＠
+   666               umask:022
+  110 110 110                                     000 010 010
+                                     取反
+  110 110 110 －－－－－－－－ 111 101 101
+  111 101 101             与运算
+   
+  110 100 100  644
+ 
+    umask 002    
+＠＠＠＠
+
+
+chattr
+　　
+　　1.作用
+　　
+　　修改ext2和ext3文件系统属性(attribute)，使用权限超级用户。
+　　
+　　2.格式
+　　
+　　chattr [-RV] [-+=AacDdijsSu] [-v version] 文件或目录
+　　
+　　3.主要参数
+　　
+　　－R：递归处理所有的文件及子目录。
+　　
+　　－V：详细显示修改内容，并打印输出。
+　　
+　　－：失效属性。
+　　
+　　＋：激活属性。
+　　
+　　= ：指定属性。
+　　
+　　A：Atime，告诉系统不要修改对这个文件的最后访问时间。
+　　
+　　S：Sync，一旦应用程序对这个文件执行了写操作，使系统立刻把修改的结果写到磁盘。
+　　
+＊　　a：Append Only，系统只允许在这个文件之后追加数据，不允许任何进程覆盖或截断这个文件。如果目录具有这个属性，系统将只允许在这个目录下建立和修改文件，而不允许删除任何文件。
+　　
+＊　　i：Immutable，系统不允许对这个文件进行任何的修改。如果目录具有这个属性，那么任何的进程只能修改目录之下的文件，不允许建立和删除文件。
+　　
+　　D：检查压缩文件中的错误。
+　　
+　　d：No dump，在进行文件系统备份时，dump程序将忽略这个文件。
+　　
+　　C：Compress，系统以透明的方式压缩这个文件。从这个文件读取时，返回的是解压之后的数据；而向这个文件中写入数据时，数据首先被压缩之后才写入磁盘。
+　　
+　　s：Secure Delete，让系统在删除这个文件时，使用0填充文件所在的区域。
+　　
+　　u：Undelete，当一个应用程序请求删除这个文件，系统会保留其数据块以便以后能够恢复删除这个文件。
+（防止管理员权限过大，误删除）
+　　
+umask  0022 第一个数
+特殊权限SUID SGID STICKY
+      SUID  SGID Sticky 
+       u     g    o
+      rwx   rwx    rwx
+  SUID 在u 3位组的x位表示： rws （rwx） 
+                         rwS （rw-）
+  SGID 在g 3位组的x位表示： rws （rwx） 
+                          rwS （rw-）
+  Sticky 在o 3位组的x位表示： rwt （rwx） 
+                          rwT （rw-）
+     SUID  SGID  Sticky
+                     4           2               1  
+   
+    chmod u-s
+          u+s
+          o+t
+  
+ 可执行文件：SUID SGID只能用于可执行文件，
+
+    user1      进程 root
+     passwd------------>/etc/shadow
+                        400 root root
+    which passwd
+    ls -l /usr/bin/passwd  
+      rwsr-xr-x   root root
+      4755 
+
+ 目录：SGID Sticky
+  SGID
+  在/test/下建立一个目录abc
+  abc owner:user1 group:user1 777
+  user2: 在/test/abc/下创建文件file1.user2
+                               文件file2.user2
+  chmod g+s /test/abc/
+  user2: 在/test/abc/下创建文件file3.user2
+                               文件file4.user2
+  Sticky
+   用user1 删除 file1.user2 file3.user2
+  chmod o+t /test/abc
+  用user1 删除 file2.user2 file4.user2
+
+ 
+ 复制/etc/passwd 到/tmp/passwd.tmp
+ 在vim中替换把/tmp/passwd.tmp中的bash替换hello
+ :%s/bash/hello/g----->sed
+
+
+
+
+ umask 002 创建一个目录的权限是多少（具体算法）
+  777                   002
+ 111 111 111           000 000 010
+ 111 111 101            111 111 101
+ 111 111 101  
+
+
+ 总结SUID SGID Sticky的作用（注意对象）
+  可执行文件SUID SGID
+ 执行可执行文件的时候，不以执行者的身份去运行，而是以文件所属人（组）的身份去执行
+  	目录 SGID Sticky
+ SGID：当一个A目录具有SGID的时候，在这个目录下新建的文件文件夹默认所属组会是A目录的所属组
+ Sticky：当A目录具有Sticky位的时候，在A目录下的文件只有文件的所属人才能够删除文件，其他人哪怕对A目录有写的权限也不能删。
+ 课上做过的练习反覆做2～3遍（特殊权限，添加组）
+    file 640  root root
+   user1 user2 user3
+     rw    r    ---
+
+  facl
+ 终端1：   /test/file 640 root root
+     getfacl /test/file
+     setfacl -m u:user1:rw /test/file
+     setfacl -m g:user1:rw /test/file
+     getfacl /test/file
+    
+ 终端2：  user1 : cat /test/file
+
+
+ setfacl -m u:<username>:<prem>  file|dir
+ setfacl -m d:u:<username>:<perm> dir
+ setfacl -x u:username file  取消指定用户
+ setfacl -b file  取消所有用户
+
+
+
+文件结构介绍
+inode
+block
+硬链接
+软链接
+Windows中文件快捷方式概念和Linux中文件链接概念比较
+ln命令使用
+cp
+1、	分配一个未使用的inode号码，在inode表中添加一个新项目
+2、	在目录中创建一个dentry，关联文件名和inode号码                  directory entry
+3、	把数据复制到新文件中
+
+mv
+如果目标和源文件在相同的文件系统：
+1、	使用新文件名新建目录项目
+2、	删除带有原有文件名的原有目录项
+出时间标记以外对inode没有影响，对磁盘上的数据没有影响，不会移动数据
+如果目标是不同的文件系统，mv就是复制和删除
+
+rm
+1、	减少连接的数目，从而释放inode号码，这个号码可以被重新利用
+2、	把数据块放在可用空间列表中
+3、	删除目录项目	
+数据没有被实际的删除，但是当数据块被另一个文件使用时，原有的数据就会被覆盖
+、
+硬链接
+1、	两个路径名必须都在一个文件系统上（共享一个inode号码，inode表对于某个文件系统是独特的）。inode号码和inode必须在同一个文件系统
+2、	无法使用ln命令创建目录的额外硬链接
+   ln <filename> <linkname>
+注：硬连接不能跨越分区，只能在同一个分区。不能给目录作硬连接。
+
+符号链接（软连接）
+1、	有自己的inode号码：符号链接是和原文件不用的单独文件
+2、	长列表的第一个字母是l：符号链接是一种特殊类型的文件，它有自己的文件类型标记
+3、	符号链接的权限不重要，实际是指向文件的权限
+4、	符号链接的内容是它指向文件的路径名
+
+ ln -s </PATH/filename> <linkname>
+

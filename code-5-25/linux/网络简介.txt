@@ -1,0 +1,192 @@
+#网络管理
+网络接口名称：
+以太 标识 ethN    光纤 标识 fddiN    PPP  标识 pppN    环回 标识 lo  在IPC进程间通信及没有网络时使用
+网卡的状态：#mii-tool
+
+配置网卡：
+#setup    #service network restart
+查看网卡的信息：
+ifconfig [ -a | interface ]    不带-a只查看已经启动的网卡    -a  所有网卡
+eth0      Link encap:Ethernet  HWaddr 00:0C:29:BF:AC:86  
+          inet addr:10.10.10.254  Bcast:10.10.10.255  Mask:255.255.255.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:2332 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:1851 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:201708 (196.9 KiB)  TX bytes:233403 (227.9 KiB)
+          Interrupt:177 Base address:0x1400 
+Link encap：网卡位于OSI模型中的名称
+HWaddr：网卡的物理地址
+inet addr:Bcast:Mask：配置的IP  广播  掩码
+MTU:Metric:最大传输单元  默认的路由成本(跳数)
+RX：接收    TX：发送
+collisions：碰撞次数    txqueuelen：发送队列的长度
+
+
+网卡的启用与停用：
+#ifconfig eth0 down    #ifconfig eth0 up    #service network restart
+service servicename start/stop/restart/status
+网卡的配置文件：
+/etc/sysconfig/network-scripts/ifcfg-eth0
+/etc/sysconfig/network-scripts/ifcfg-lo
+/etc/sysconfig/network-scripts/ifcfg-eth1
+#cat /etc/sysconfig/network-scripts/ifcfg-eth0
+# Advanced Micro Devices [AMD] 79c970 [PCnet32 LANCE]
+DEVICE=eth0
+BOOTPROTO=none
+ONBOOT=yes
+HWADDR=00:0c:29:bf:ac:86
+IPADDR=10.10.10.254
+NETMASK=255.255.255.0
+TYPE=Ethernet
+#less /usr/share/doc/initscripts-VERSION/sysconfig.txt
+
+IP别名：原则上一个网卡一个IP，但有时候只有一个网卡时又要使用多个IP。此时可以使用IP别名的方法将一个网卡绑定多个IP。
+#ifconfig eth0:1 IP netmask MASK    #vi ifcfg-eth0:1
+
+开关网卡：#ifconfig up/down eth0    #ifup/ifdown eth0
+
+
+
+#启动
+#启动过程
+如果有一台服务器起不来了，我们应该怎么办？要处理这样的问题我们需要掌握系统启动流程，根据提示信息判断系统在
+那个启动环节遇到问题。
+
+整个过程：
+BIOS
+bootloader
+kernel初始化
+init <--/etc/inittab
+  /etc/rc.d/rc.sysinit
+  /etc/rc.d/rc
+  /etc/rc.d/rc[0-6].d/  Kstop  Sstart
+  /etc/rc.d/rc.local
+虚拟终端tty
+  bash
+X window
+
+流程图：
+BIOS加电--->HD
+      \|/
+   MBR（512字节，446引导，16分区表，2结束（有效）标志（0x55AA））
+      \|/--->stage1--->stage1.5--->stage2（grub程序）
+BootLoader(GRUB) <---/boot/grub/grub.conf
+      \|/
+Kernel Initialization（设备检测，设备驱动初始化，只读挂载文件系统，执行init程序）
+      \|/
+   init程序<---/etc/inittab
+                           |<---/etc/rc.d/rc.sysinit（后面写的很多项目）
+                           |<---/etc/rc.d/rc N
+                           |                         |<---rcN.d/
+                           |<---/etc/rc.d/rc.local
+  mingetty(login,tty1-tty6)
+      \|/
+    shell
+      \|/
+X Windows
+             
+
+其间重要的配置文件：/etc/inittab
+启动级别
+	0 关机
+	1 单用户
+	2 多用户模式但带网络但不能远程登录
+	3 不受限多用户模式 TUI
+	4 保留
+	5 图形模式
+	6 重新启动
+查看启动级别
+	# runlevel
+	N 3
+	N是上次的级别,3是当前级别 也就是说机器开机就是3级别
+切换级别
+	init 5
+当前运行级别：#runlevel    #who -r
+默认运行级别：#grep initdefault /etc/inittab
+
+挂载文件系统：/etc/fstab
+第一项 是要mount的存储装置的实体位置或者用卷标
+第二项 要挂到哪个目录位置
+第三项 指定要挂载的系统格式
+第四项 mount时要设定的状态，只读或defauls
+第五项 提供DUMP功能，在系统DUMP时需要BACKUP的标志位，其内定位置是 0
+第六项 设定开机时文件系统是否要check
+除了root的文件系统其必要的check为1 其他视需要而定 默认是0
+LABEL=/boot             /boot                   ext3    defaults        1 2
+
+BIOS：对计算机的基本输入输出系统进行管理和设置
+自诊断:识别硬件配置，并进行自检和初始化
+设置程序：引导中使用特殊的热键，启动的顺序
+系统自举装载程序：自检成功后将磁盘相对0磁道0扇区的引导程序加载内存
+
+bootloader - GRUB  lilo
+grub：
+一块硬盘，有一个主引导记录，就是0柱面0磁头1扇区，又称MBR。此后硬盘最多可以分成4个主分区，也可以把其中的一个主分区变成扩展分区，进而分成若干个逻辑分区。其中每一个分区又有自己的引导扇区，虽然名字不叫MBR，但是作用是一样的，不同的是，MBR是由BIOS自动装载到内存中并CPU跳转过去执行的，而普通分区上的引导扇区，需要MBR中的引导程序去装载并提交控制权。
+stage1：
+/boot/grub中的stage1文件大小为512b，它是引导扇区中引导程序（前446字节为引导程序）的备份文件，功能是用来装载stage1.5或stage2的。
+stage1.5：
+因为STAGE2较大，通常都是放在一个文件系统当中的，但是STAGE1并不能识别文件系统格式，所以才需要STAGE1.5来引导位于某个文件系统当中的STAGE2，根据文件系统格式的不同，TAGE1.5也需要相应的文件，如：e2fs_stage1_5，fat_stage1_5，分别用于识别ext和fat的文件系统格式。
+但是，当stage1加载1.5时，原则上是不认识ext文件系统的，应该也是无法找到1.5程序的，而实际上在安装grub时，程序已经把1.5程序写到硬盘最前面的32K中，因为紧连着MBR的一段硬盘空间通常是空白无用的，grub就把1.5程序写到这个地方，这个地方没有文件系统，
+stage1程序可以直接去加载1.5。
+stage2：
+grub能让用户以选项方式将OS加载、改变参数、修改选项，这些全都是stage2程序的功能。stage2可以去获取grub.conf以及menu.lst等文件的内容。在grub中硬盘编号从0开始，比如(hd0,0)表示第一块硬盘的第一个分区，主分区从（hd0,0）-（hd0,3），（hd0,4）以后都是逻辑分区。
+/boot/grub/grub.conf
+(1)grub的磁盘以及分区的命名方式和linux有所区别,第一个磁盘是从0开始,第一个分区也是从0开始.譬如第一个硬盘的第5分区在linux下面是/dev/hda5 ,而在grub里面是(hd0,4).再如/dev/fd0在grub里面是(fd0,0).(最后一句如有错误望提醒)
+(2)不管是IDE硬盘hda,hdb还是SCSI硬盘sda,sdb在grub里面都是以hd方式命名.
+　譬如虚拟机里面的/dev/sda2在grub里面是(hd0,1),再如/dev/hdb7在grub里面以(hd1,6)命名.
+(3)要搞清楚上面两个root的关系,root (hd0,0)中的root是grub命令,它用来指定boot所在的分区作为grub的根目录.而root=/dev/ram0是kernel的参数,它告诉操作系统内核加载完毕之后,真实的文件系统所在的设备.要注意grub的根目录和文件系统的根目录的区别.
+查看statge信息：
+#hexdump -C e2fs_stage1_5 | less
+#hexdump -C /dev/sda | less
+
+kernel初始化：
+设备的检测
+设备的初始化（从initrd加载模块）
+只读的方式挂载根
+加载初始程序init
+/var/log/dmesg
+
+init初始化：
+/etc/inittab
+id：是一个任意指定的四个字符以内的序列标号，在本文件内必须唯一；使用老版本的libc5（低于5.2.18）或a.out库编译出来的 sysvinit限制为2字符。注意：像getty之类的登陆进程必须使id字段与tty编号一致，如tty1需要id=1，许多老版本的登陆进程都遵循这种规则。
+runlevels：表示这一行适用于运行那个/些级别（这里是2，可以有多个，表示在相应的运行级均需要运行）；另外sysinit、boot、bootwait这三个进程会忽略这个设置值。
+action：表示进入对应的runlevels时，init应该运行process字段的命令的方式，常用的字段值及解释在附录内。例子中的wait表示需要运行这个进程一次并等待其结束。
+process：具体应该执行的命令。例子中的/etc/init.d/rc命令启动运行级别2中应该运行的进程/命令，并负责在退出运行级时将其终止（当然在进入的runlevel中仍要运行的程序除外。）
+当运行级别改变，并且正在运行的程序并没有在新的运行级别中指定需要运行，那么init会先发送一个SIGTERM 信号终止，然后是SIGKILL.
+有效的action值如下：respawn：表示init应该监视这个进程，即使其结束后也应该被重新启动。
+wait：init应该运行这个进程一次，并等待其结束后再进行下一步操作。
+once：init需要运行这个进程一次。
+boot：随系统启动运行，所以runlevel值对其无效。
+bootwait：随系统启动运行，并且init应该等待其结束。
+off：没有任何意义。
+initdefault：系统启动后的默认运行级别；由于进入相应的运行级别会激活对应级别的进程，所以对其指定process字段没有任何意义。如果inittab文件内不存在这一条记录，系统启动时在控制台上询问进入的运行级。
+sysinit：系统启动时准备运行的命令。比如说，这个命令将清除/tmp.可以查看/etc/rc.d/rc.sysinit脚本了解其运行了那些操作。
+powerwait：允许init在电源被切断时，关闭系统。当然前提是有U P S和监视U P S并通知init电源已被切断的软件。RH linux默认没有列出该选项。
+powerfail：同powerwait，但init不会等待正在运行的进程结束。RH linux默认没有列出该选项。
+powerokwait：当电源监视软件报告“电源恢复”时，init要执行的操作。
+powerfailnow：检测到ups电源即将耗尽时，init要执行的操作，和powerwait/powerfail不同的。
+ctrlaltdel：允许init在用户于控制台键盘上按下Ctrl + Alt + Del组合键时，重新启动系统。注意，如果该系统放在一个公共场所，系统管理员可将Ctrl + Alt + Del组合键配置为别的行为，比如忽略等。
+系统初始化/etc/rc.d/rc.sysinit：
+1、获取网络环境与主机类型
+首先读取网络设置文件 /etc/sysconfig/network,获取主机名称与默认网关（GATEWAY）等网络环境。
+2、测试与载入内存设备/proc及USB设备/sys
+除载入内存设备/proc之外，还会主动检测系统上是否有USB的设备，若有，则会主动加载USB的驱动程序，并且尝试载入USB的文件系统。
+3、决定是否启动SELINUX
+现在，很多版本都加入了美国国家安全局开发的security enhance linux 套件，这个SELINUX可以强化LINUX操作环境的安全性，不过对于新手来说，不是很容易，因此，我们建议大家先不要启动，无论如何，在这个阶段，我们可以分析SELINUX是否要启动。
+4、接口设备的检测与即插即用（PnP）参数的测试
+根据核心在启动时检测的结果(/proc/sys/kernel/modprobe)开始进行 ide / scsi / 网络 /音效等接口设备的检测，以及利用以加载的核心模块进行PNP设备的参数测试。
+5、用户自定义模块的加载
+用户可以在/etc/sysconfig/modules/*.modules加入自定义的模块，此时会加载到系统中。
+6、加载核心的相关设置
+系统会主动去读取/etc/sysctl.conf文件的设置值，使核心功能符合我们的要求。
+7、设置系统时间(clock)
+8、设置终端控制台(console)的字形
+9、设置RAID与LVM等硬盘功能
+10、以FSCK检验磁盘文件系统
+11、进行磁盘配额quota的转换(非必要)
+12、重新以可读取模式载入系统磁盘
+13、启动quota功能
+14、启动系统随机数设备(产生随机数功能)
+15、清除启动过程中的临时文件
+16、将启动相关信息加载到/var/log/dmesg文件中。

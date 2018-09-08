@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
+
+#define TTY1		"/dev/tty11"
+#define TTY2		"/dev/tty12"
+#define TTY3		"/dev/tty10"
+#define TTY4		"/dev/tty9"
+
+int main()
+{
+	int fd1,fd2;
+	
+	fd1 = open(TTY1,O_RDWR);
+	if(fd1 < 0)
+	{
+		perror("open()");
+		exit(1);
+	}
+	write(fd1,"TTY1\n",5);
+
+	fd2 = open(TTY2,O_RDWR|O_NONBLOCK);
+    if(fd1 < 0)
+    {
+        perror("open()");
+        exit(1);
+    }
+	write(fd2,"TTY2\n",5);
+
+
+	job1 = rel_addjob(fd1,fd2);
+	if(job1 < 0)
+	{
+		(-job1)
+	
+	}
+
+	fd3 = open();
+
+	fd4 = open();
+
+	job2 = rel_addjob(fd3,fd4);
+	if()
+	{
+
+
+	}
+
+
+	while(1)
+		pause();
+
+
+	close(fd1);
+	close(fd2);
+
+	exit(0);
+}
+

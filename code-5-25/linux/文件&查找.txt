@@ -1,0 +1,307 @@
+
+输入输出流程:
+
+	    STDIN   
+	APP 输入<-- 键盘
+		   
+	 |
+	APP 处理
+	 |           STDOUT
+		   / 1 标准输默认显示文件的头10行出 \
+	APP 输出--> 		 ---> 屏幕
+		   \ 2 错误输出 /	
+                    STDERR
+如果我想把一个程序的输出错误存放到单独的一个文件中,那么我们在这个流程中该如何介入呢?
+其实很简单,只是用标记符来控制输入的源和输出的目标.
+  1> STDOUT重定向
+   >>  追加
+   2> STDERR 重定向
+   &>
+	试验:
+	  ls > out.file 将标准输出定向到文件 如果文件不存在则创建,如果文件存在则覆盖
+	  ls >> out.file 将标准输出定向到文件 如果文件不存在则创建,如果文件存在则追加
+	  ls 2> err.file 将标准输出定向到文件 如果文件不存在则创建,如果文件存在则覆盖
+	  ls 2>> err.file 将标准输出定向到文件 如果文件不存在则创建,如果文件存在则追加
+	  ls > out.file 2> err.file 将标准输出与标准错误分别定向到文件
+	  ls &> all.file  将标准错误和标准输出合并定向到文件
+	  ls >/dev/null 2>&1 讲标准错误和标准输出合并定向到系统黑洞
+		/dev/zero  零发生器
+	#dd if=/dev/zero of=/home/file bs=5M count=2 
+
+  	 
+     | 管道符  pipe()
+  管道符用来连接多个命令，管道符左边命令的标准输出会作为管道符右边命令的标准输入
+其中 命令之间用“；”或者“｜”连接，若用“｜”作管道符，管道符左边命令的标准输出会作为管道符右边命令的标准输入；若用“；”作管道符，各个命令之间乎不干扰。
+   标准错误输出不能通过管道符
+
+    ls -l /etc/ | less
+echo "test" | mail -s "test" root@localhost
+cat file | mail 
+
+@@@@@@@
+head 默认显示文件的头10行
+head -n 3  /etc/passwd
+-n 3 显示前3行
+
+tail 默认显示文件的末尾10行
+tail -n 5 /etc/passwd   注：－n 5 显示末尾5行
+     -f   同步（镜像）查看日志文件***************
+                      
+
+终端1： tail -f /var/log/secure
+  
+ 终端2：su - user1
+可查看系统进程
+
+
+
+
+cut 按列提取文件
+	-d 指明列分隔符 -f 选择输出的区域 -c 指定字符位置（－d  －f  不能 分开使用）
+	# cut -d: -f 1,7 /etc/passwd |head -n 2
+	    root:/bin/bash
+	    bin:/sbin/nologin
+	# cut -c 1-3,6-9 /etc/passwd |head -n 2
+
+wc 计算文件的行数,单词数,字节数
+	# wc /etc/passwd
+	  40   59 1800 /etc/passwd
+	# wc -l /etc/passwd
+	  40 /etc/passwd   显示行数
+	# wc -w /etc/passwd
+	  59 /etc/passwd   显示单词数
+	# wc -c /etc/passwd
+	  1800 /etc/passwd   显示字节数
+、＊＊＊＊＊＊＊＊＊
+diff 对比两文件的差异
+	d 删除了(delete) -a 新增了(append) -c 改变了(change)
+	cp /etc/passwd .
+	删几行 改几行 加几行
+	diff /etc/passwd passwd
+**********************************************
+
+ 
+
+
+grep -i-n   格式：grep  "内容"   <filename>
+-n 显示行号
+－i  忽略大小写   ls -l | grep -i 内容     显示与内容相符的信息，但忽略大小写
+＊＊
+   正则表达式:用一些特殊字符描述一个特征，用来匹配符合这一特征的字符串
+     ^   $    ^ 匹配行首   $ 匹配行尾
+    grep  ^root <filename>  检索并显示<filename>文件中以root开始的行
+
+
+文件的查找与压缩
+文件查找
+which  显示命令的文件路径   which command
+whereis  显示命令的文件路径  相关内容，手册等信息
+locate <string>   （准确度低，但是速度快）
+全路径查询，在路径中匹配
+        updatedb  更新locate的数据库
+
+find ［目录］［条件］ ［动作］ 
+   实时的查找
+   多条件尽可能精确的定位搜索对象
+   find可以连接命令对查找出的结果直接作处理
+     1.  -exec or -ok 
+      2. {} 匹配查询出的结果
+      3。整条命令的结尾 Space\;
+
+		-type 类型 f d l p c b
+		-name 名称 可以通配    －iname名称忽略大小写
+		-size 大小 +1M 大于1M,-1M 小于1M,1M 等于1M
+		-user 文件拥有者
+		-group文件属组
+		-perm 权限 有+ -时0是通配;+代表(或)三组权限匹配其中之一;比如 r-x 满足r-- --x r-x 三个都成立		  
+			-代表(与)三组权限同时匹配; 比如 r-xr-xr-x 满足r----xr-x 也算成立
+        find / -perm 755
+               -perm +222 anyone
+               -perm -222 everyone
+                         -755  7   75 75
+         find /etc -perm -002
+ 
+		-o    或
+		-not  非
+		-ls   详细信息
+		-mtime +3 从当天向历史天数推算的第三天前(三天前 不包含第三天)
+		-atime -3 从当前向历史天数推算的前三天至当天这个段范围
+		-ctime 3  从当天向历史天数推算的第三天
+		15 16 17 18 19 20
+
+
+find /etc/ -perm -002 -exec chmod o-w {} \;（－002 orher中有“w”权限，0 表示不关心user 和 group的权限）
+
+find /etc/ -name "*.conf" -ok cp {} {}.bak \;
+find /tmp/ -size +100M -exec rm {} \;
+find /tmp -user user1 -atime +3 -exec rm {} \;
+find -not -perm +111 -name "*.sh" -exec chmod u+x {} \;
+  －not -perm ＋111 都没有执行权限
+
+
+文件压缩 
+gzip
+gunzip
+bzip2
+bunzip2
+tar linux中标准的归档命令
+   归档：便于传输，备份
+压缩和解压    1G 
+	.gz   10s  900M
+	解压1：gunzip FileName.gz
+	解压2：gzip -d FileName.gz
+	压缩：gzip FileName
+	.bz2  30s  600M 
+	解压1：bzip2 -d FileName.bz2
+	解压2：bunzip2 FileName.bz2
+	压缩： bzip2  FileName
+
+
+
+tar 
+      -c创建归档文件 
+-x释放归档文件 -v显示额外信息 -f归档之后的文件名 -t查看归档文件但不解压  -z调用gzip，打包并压缩 -j调用bzip2，打包并压缩
+	创建归档文件  －C  释放到指定目录
+	tar cvf etc_init.d.tar /etc/init.d/
+	tar xvf etc_init.d.tar /etc/init.d/
+   tar cvf <filename.tar>  <源文件>,f必须放到最后并紧跟创建的归档名
+	查看归档文件中的内容
+	tar tvf  etc_init.d.tar
+
+	tar 不过是一个打包工具;
+	若需要进行对打包文件进行压缩 还需要其他工具gzip gunzip bzip2 bunzip2
+	这些工具已经被tar所集成
+	tar cvzf etc_init.d.tar.gz /etc/init.d/
+	tar cvjf etc_init.d.tar.bz2 /etc/init.d/
+	
+	zip etc-backup.tar.bz2.zip etc-backup.tar.bz2  压缩
+	unzip etc-backup.tar.bz2.zip  解压缩
+
+===================
+dd    convert and  copy a file  
+
+
+if=[input file name]  输入文件
+of=[output file name] 输出文件
+
+ibs=[Bytes]  一次读取Bytes字节，即读入缓冲区的字节数
+obs=[Bytes]  一个写入Bytes字节，即写入缓冲区的字节数
+cbs=[count]  一次只做多少个Bytes
+
+bs=[Bytes]   同时设置读/写缓冲区的字节数（相当于设置ibs和obs）
+count=blocks  拷贝多少个blocks
+
+seek=Blocks   跳过一段以后才输出
+skip=Blocks   跳过一段以后才输入
+
+作业：
+
+1．使用grep显示出/usr/share/dict/words文件中，例如显示出所有含有fish的行：
+2．使用grep显示出/usr/share/dict/words文件中，输出任何包含fish的所有行，还要输出紧接着这行的上下各两行的内容：
+grep -A2 -B2 -n fish /etc/passwd
+3. 使用grep显示出/usr/share/dict/words文件中，来显示出在words文件中有多少行含有fish。
+
+     /dev/null  黑洞文件
+      /dev/zero 零发生器
+4.   dd if=/dev/zero of=/opt/file10 bs=10M count=1
+  1).在/opt目录中分别建立五个文件,大小分别为10M 13M 15M 17M 20M.
+      touch -m
+  2).并将文件mtime依次修改为1天前日期,3天前日期,5天前日期,7天前日期,9天前的日期.
+  3).搜索/opt目录中,大小超过18M的所有文件,并以长列表的方式显示出来.
+  4).搜索/opt目录中,大小在小于13M或大于16M的所有文件,并将其复制到/mnt下去.
+ find /opt \( -size -13M -o -size +16M \) -exec cp {} /mnt{} \;
+  5).搜索/opt目录中,大小在大于16M且小于18M的文件,并将其改名为new_file.
+  6).搜索/opt目录中名字以fil开头所有文件,并将其全部删除.
+  7).再按时间匹配进行搜索 -mtime +3 , -mtime -3 , -mtime 3 这几个参数去搜索.测试出+3 -3 3的各自含义是什么?
+
+建立用户alex,joshua,bryan,dax,zak,ed,manager
+建立sales组（GID：520）；hr组（GID：530）；web组（GID：540）
+alex,joshua的附属组是sales； dax,bryan附属组是hr；zak,ed附属组是web；manager的附属组是这3个。
+建立/common目录，在/common目录下建立abc文件夹，在/abc文件夹下，建立file文件
+abc拥有者是root，所属组是hr
+web组对abc有完全访问权限
+alex对/common/abc目录有rx权限;alex对abc默认ACL权限rw
+切换不同的用户测试效果
+
+使用cat 查看 /etc/passwd 
+分页显示 /etc目录下的内容
+
+查看 /etc/passwd 文件的前3行
+
+查看/etc/passwd 文件的后5行
+
+同步查看系统日志文件（在一个终端内使用#tail –f /var/log/secure，开启另一个终端使用不同的用户登录系统，切换回去看现象）
+
+建立用户tony和mary
+提取/etc/passwd中包含tony字符串的哪一行
+提取/etc/passwd中包含字符1的所有行并打印行号（使用 | ）
+提取/etc/passwd中不包含root字符串的所有行并分页显示
+提取包含ftp字符串所在行并同时显示前2行
+提取包含ftp字符串所在行并同时显示后3行
+
+提取/etc/passwd文件中的第一和第三列
+提取/etc/passwd文件中的第1-3个字符
+
+
+统计/usr/share/dict/words有多少行
+统计/usr/share/dict/words有多少单词
+统计/usr/share/dict/words有多少字节
+
+以字母的顺序 查看/etc/passwd
+以字母的顺序 反向查看/etc/passwd
+查看/etc/passwd 以数字的方式排列第三列
+
+新建一个文件内容如下
+a
+a
+a
+b
+b
+c
+d
+d
+c
+e
+以反向字母顺序打印文件内容到STDOUT并去除相同行
+以反向字母顺序打印文件内容到STDOUT去除相同行并打印相同行的数目
+
+
+
+
+
+
+
+   建立文件 file1 file2 file3 file4
+   归档file1 file2 file3到3in1.tar
+   释放归档3in1.tar到/tmp目录下
+   在3in1.tar中追加file4
+tar  -rvf 3inl.tar  file4    或者   tar  f  3inl.tar  -r file4
+   从3in1.tar这中单独释放file2
+   用gzip 压缩file2 要求压缩后保留源文件
+gzip -c <filename>  > file2.gz
+   用bzip2 压缩file2 要求压缩后保留源文件
+bzip2 -c <filename> > file2.bz
+解压
+gunzip <filename>
+
+   发现一个文件的链接数大于一，代表这个文件被硬链接，那所有引用到这个文件inode的文件在那里？
+   进程的定义 创建 结束 状态
+   ps top free 基本的使用要会
+
+
+
+   怎么查找进程 怎么去管理进程
+   怎么查看进程的nice值和调整nice值 
+
+
+
+
+
+
+
+
+
+
+
+
+

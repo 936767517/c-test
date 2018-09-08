@@ -1,0 +1,172 @@
+Linux是什么？
+1.开放源代码的类UNIX操作系统内核
+2.GNU/linux操作系统
+
+UNIX/Linux历史
+UNIX诞生
+由肯·汤普逊、丹尼斯·里奇于1969年在AT&T的贝尔实验室开发。
+1971年共同发明了C语言，用C语言编写的Unix代码简洁紧凑、易移植、易读、易修改，为此后Unix的发展奠定了坚实基础。
+
+UNIX历史版本
+BSD
+SYS v
+IBM的AIX、HP的HP-UX、SUN的Solaris
+
+GNU-----“GNU's Not Unix”计划（项目）由理查德·斯托曼在1983发起的。它的目标是创建一套完全自由的操作系统。
+为保证GNU软件可以自由地“使用、复制、修改和发布”，所有GNU软件都包含一份在禁止其他人添加任何限制的情况下，授权所有权利给任何人的协议条款，GNU通用公共许可证（GNU General Public License，GPL）。
+GPL---通用公共许可证
+以任何目的运行此程序的自由；
+再发行复制件的自由；
+改进此程序，并公开发布改进的自由
+1985年，理查德·斯托曼又创立了自由软件基金会（Free Software Foundation）来为GNU计划提供技术、法律以及财政支持
+1990年，GNU计划已经开发出的软件包括了一个功能强大的文字编辑器Emacs、C语言编译器GCC以及大部分UNIX系统的程序库和工具。唯一依然没有完成的重要组件，就是操作系统的内核（称为HURD）
+
+1991年，Linus Torvalds 编写出了与UNIX兼容的Linux操作系统内核并在GPL条款下发布。Linux之后在网上广泛流传，许多程序员参与了开发与修改。
+
+1992年，Linux与其他GNU软件结合，完全自由的操作系统正式诞生。该操作系统往往被称为“GNU/Linux”或简称Linux。
+
+
+
+常见Linux发布版
+RedHat Linux
+Novell SuSE Linux
+Debian Linux
+Ubuntu Linux
+ 
+RedHat Linux 历史版本介绍
+Red Hat Linux 6.2 → Red Hat Linux 6.2E
+Red Hat Linux 7.2 → Red Hat Enterprise Linux 2.1
+Red Hat Linux 9 → Red Hat Enterprise Linux 3
+Fedora Core 3 → Red Hat Enterprise Linux 4
+Fedora Core 6 → Red Hat Enterprise Linux 5
+Fedora 12 → Red Hat Enterprise Linux 6
+
+Fedora 版本及其与RedHat的关系
+CentOS Linux版本及其与RedHat Enterprise Linux 的关系
+RHEL 一直都提供源代码的发行方式，CentOS 就是将 RHEL 发行的源代码从新编译一次，形成一个可使用的二进制版本。由于 LINUX 的源代码是 GNU，所以从获得 RHEL 的源代码到编译成新的二进制，都是合法。只是 REDHAT 是商标，所以必须在新的发行版里将 REDHAT 的商标去掉。
+
+Oracle Linux版本及其与RedHat Enterprise Linux 的关系
+
+Linux相关认证介绍
+RHCSA ( RHCT )--红帽认证系统管理员
+RHCE--红帽认证技师
+RHCA--红帽认证架构师
+LPI 1 2 3--Linux应用技能认证
+
+
+
+linux发展方向
+1、嵌入式系统
+2、各类服务器应用
+3、工作、学习和娱乐平台
+
+
+
+Linux命令行及桌面操作简介
+tui：F1-F6
+gui：F7   如果操作失败，输入startx即可
+
+Linux基本命令介绍
+命令 [option] [对象]
+如何察看帮助
+
+1、whatis   获得帮助  
+	makewhatis 立刻更新数据库
+2、--help
+
+
+
+
+＊＊＊＊＊＊＊＊＊＊＊＊＊
+（重点掌握其中一种）
+3、man [-k]   格式  man 命令提示符   
+           （ man 7 man   1 基本命令   2 系统调用  3  库函数 调用 4 介绍dev下的    5    配置文件的手册  6 游戏手册     7     网络协议，字符编码的手册  8 系统命令 9  内核）
+
+4、info            格式    info  命令提示符
+＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊
+
+
+基本文件管理命令
+单树结构 
+绝对路径   以/开始
+相对路径   不以/开始的
+  cd ..返回上一级目录
+     cd .／abc＝cd abc   .代表当前目录；..代表上一级目录
+pwd
+ls [ -l | -a | -h | -i | -d ]
+cd [ / | - | . | .. | ~]
+touch 创建新文件，更新时间
+rm [ -i | -f | -r] 删除文件
+    rm -f file1 强行删除file1文件
+mkdir [ -p ]   创建目录   －p 自动创建上一级目录中没有出现的文件
+rmdir   删除目录，且只能删除空目录
+ rm －r 删除目录，“－r“为递归，一级一级删除
+  rm  －rf  强行一次性删除目录
+cp [ -r | -p ]  拷贝文件
+  格式  cp 源文件   目的地；cp  源文件  重命名文件   重命名
+      cp －p  拷贝文件的所有的信息，常用在 的配置文件中
+mv 剪切
+
+linux一切皆文件
+bin	系统命令
+sbin	系统命令root
+boot	内核
+dev	设备文件
+etc	配置文件
+home	普通用户的家目录
+include 头文件
+lib(64) 库文件
+media   系统自动挂载外部存储设备
+mnt	用户手动挂载外部存储设备
+misc	挂载 
+proc	伪文件系统
+root    管理员的家目录
+tmp	临时文件
+usr	乱七八糟 （用户命令，库文件，头文件）
+var	变化文件，服务器共享目录
+
+
+file  查看文件类型
+stat   
+
+cat [ -n ]   查看文件内容  
+
+head -n N filename
+tail -N   filename
+less  分页显示文件内容   PgUp PgDn  上下方向键 回车键
+/string  查找与string相符合的字符串  n N  向上/下查找
+
+
+
+TAB  补全命令、文件名等等
+alt+.把上一个命令最后的参数补全
+history
+alias
+
+
+
+作业：
+分别使用图形和字符方式安装rhel5，在安装过程中能够自由的分区
+安装rhel5 那些分区是必要的，它们的作用分别是什么
+简述linux系统的目录架构以及/bin /sbin /etc /proc /var /home  /usr目录的作用
+查看基本文件管理命令的man手册（info）
+如何在man手册中做搜索
+进入/tmp目录建立文件夹dir1/dir2/dir3/
+拷贝/root/install.log到dir3中
+拷贝/root/install.log到dir2中重命名为file.log
+在dir3中创建文件test
+剪切文件test到dir1中
+删除目录 dir1 dir2 dir3
+
+
+
+
+
+
+
+
+
+
+
+
+

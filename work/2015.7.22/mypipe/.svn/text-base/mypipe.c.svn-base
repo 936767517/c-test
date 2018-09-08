@@ -1,0 +1,17 @@
+
+
+
+struct mypipe_st
+{
+	int head;
+	int tail;
+	char data[PIPESIZE];
+
+
+};
+
+
+
+
+
+

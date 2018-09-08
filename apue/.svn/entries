@@ -1,0 +1,55 @@
+10
+
+dir
+140
+svn://172.16.60.99/coder78/apue
+svn://172.16.60.99
+
+
+
+2015-07-30T02:49:52.203970Z
+140
+testsvn
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+004934dc-c04c-41c9-adba-9acac0dcbb5c
+
+few
+dir
+
+io
+dir
+
+thread
+dir
+
+env
+dir
+
+fs
+dir
+
+proj
+dir
+
+ipc
+dir
+
+signal
+dir
+
+sys
+dir
+

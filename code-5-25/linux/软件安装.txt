@@ -1,0 +1,52 @@
+自动挂载：autofs
+自动挂载的服务名叫做autofs我们就可以用#service autofs restart。
+任何服务都有他们的主配置文件autofs的主配置文件在/etc/auto.master。
+配置文件：/etc/auto.master
+/misc    /etc/auto.misc
+/misc是自动挂载的上层目录    /etc/auto.misc指明了对/misc下的目录子目录挂接的配置信息
+测试：把光盘放在光驱里，然后执行#cd /misc/cd则autofs服务会自动把光驱挂载到/misc/cd中。
+
+mount命令的使用  -t  -o loop
+
+#软件安装
+介绍完光盘内容之后。
+RPM：
+package-version-release.arch.rpm
+package:软件名称
+version:版本号。主版本号，次版本号，修正号
+release:发布版本号。指编译的次数，一个源程序在编译过程中使用不同的参数有不同的行为。
+arch:在什么体系结构运行
+#rpm -ivh httpd.rpm    
+#rpm -q httpd    
+#rpm -e httpd
+--force  --nodeps  --root
+
+YUM：
+解决了包的依赖性  可以通过多个库查找包    yum前端的图形#system-config-packages
+默认设置/etc/yum.conf
+repository：
+库文件在/etc/yum.repos.d/下文件名必须以.repo结尾
+内容：
+[repo-name]
+name=description
+baseurl=url://path
+enable=1
+gpgcheck=0
+gpgkey=url://path
+用法：
+创建缓存：#yum makecache
+查询：#yum list [all]    
+#yum info     
+#yum search   
+安装：#yum install package    
+#yum localinstall rpmfile    ==> rpm -ivh rpmfile
+卸载：#yum remove   
+升级：#yum update [package|rpmfile|@packagegroup]           
+其他：清理库信息的cache #yum clean all
+
+
+tar源码包的安装：  #不同软件会有不同的安装参数和相应的方法，具体的要查看INSTALL或README。
+# tar xvjf lftp-3.7.14.tar.bz2
+# ./configure
+# make
+# make install
